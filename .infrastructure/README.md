@@ -40,7 +40,7 @@ Bei ACR authentifizieren:
 az acr login --name aksecrdev
 ```
 
-Backend1 bauen und pushen:
+Backend bauen und pushen:
 
 ```sh
 docker buildx build --platform linux/amd64 -t aksecrdev.azurecr.io/backend:latest -f ./.build/Dockerfile .
@@ -58,6 +58,5 @@ kubectl get svc -n ingress-nginx
 Requests:
 
 ```sh
-curl http://<INGRESS_IP>/backend1
-curl http://<INGRESS_IP>/backend2
+curl http://<INGRESS_IP>/backend
 ```

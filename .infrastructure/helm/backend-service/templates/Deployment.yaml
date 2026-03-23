@@ -27,7 +27,7 @@ spec:
               {{- if .value }}
               value: {{ .value | quote }}
               {{- end }}
-              {{- if .valueFrom.secretKeyRef }}
+              {{- if .valueFrom }}
               valueFrom:
                 secretKeyRef:
                   name: {{ .valueFrom.secretKeyRef.name }}
