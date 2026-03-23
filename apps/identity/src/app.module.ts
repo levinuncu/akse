@@ -12,7 +12,7 @@ import { User } from './user/entities/user.entity';
       host: process.env.POSTGRES_HOST,
       port: Number(process.env.POSTGRES_PORT),
       password: process.env.POSTGRES_PASSWORD,
-      username: process.env.POSTGRES_USERNAME,
+      username: process.env.POSTGRES_USER,
       database: process.env.POSTGRES_DATABASE,
       entities: [User],
       synchronize: true,

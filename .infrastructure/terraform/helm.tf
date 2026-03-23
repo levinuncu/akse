@@ -8,7 +8,7 @@ resource "helm_release" "external_secrets_operator" {
     yamlencode({
       serviceAccount = {
         create = false
-        name = kubernetes_service_account.eso_akv_sa.metadata[0].name
+        name   = kubernetes_service_account.eso_akv_sa.metadata[0].name
       }
     })
   ]
@@ -94,9 +94,9 @@ resource "helm_release" "postgres" {
         targetPort = var.postgres_port
       }
       auth = {
-        username         = var.postgres_user
-        database         = var.postgres_database
-        existingSecret   = helm_release.postgres_secret.name
+        username       = var.postgres_user
+        database       = var.postgres_database
+        existingSecret = helm_release.postgres_secret.name
         secretKeys = {
           adminPasswordKey = "password"
         }
@@ -112,7 +112,15 @@ resource "helm_release" "ingress_nginx" {
   chart            = "ingress-nginx"
   namespace        = "ingress-nginx"
   create_namespace = true
-  version          = "4.12.2"
+  version          = "4.15.1"
+  set {
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/port_80_health-probe_protocol"
+    value = "Tcp"
+  }
+  set {
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/port_443_health-probe_protocol"
+    value = "Tcp"
+  }
   set {
     name  = "controller.service.type"
     value = "LoadBalancer"
@@ -184,4 +192,49 @@ resource "helm_release" "backend" {
     })
   ]
   depends_on = [helm_release.postgres, helm_release.rabbitmq]
+}
+
+resource "helm_release" "identity" {
+  name  = "identity"
+  chart = "../helm/backend-service"
+  values = [
+    yamlencode({
+      name = "identity"
+      image = {
+        repository = "${module.acr.login_server}/identity"
+        tag        = "latest"
+      }
+      containerPort = 3000
+      targetPort    = 80
+      path          = "/identity"
+      envs = [
+        {
+          name  = "POSTGRES_HOST"
+          value = "${helm_release.postgres.name}.${helm_release.postgres.namespace}.svc.cluster.local"
+        },
+        {
+          name  = "POSTGRES_PORT"
+          value = var.postgres_port
+        },
+        {
+          name  = "POSTGRES_USER"
+          value = var.postgres_user
+        },
+        {
+          name  = "POSTGRES_DATABASE"
+          value = var.postgres_database
+        },
+        {
+          name = "POSTGRES_PASSWORD"
+          valueFrom = {
+            secretKeyRef = {
+              name = helm_release.postgres_secret.name
+              key  = "password"
+            }
+          }
+        },
+      ]
+    })
+  ]
+  depends_on = [helm_release.postgres]
 }

@@ -9,10 +9,11 @@ spec:
   ingressClassName: "nginx"
   rules:
     - http:
-      - path: {{ .Values.path }}
-        pathType: Prefix
-        backend:
-          service:
-            name: {{ .Values.name }}
-            port:
-              number: {{ .Values.targetPort }}
+        paths:
+          - path: {{ .Values.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.name }}
+                port:
+                  number: {{ .Values.targetPort }}

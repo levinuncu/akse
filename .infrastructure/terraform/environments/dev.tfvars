@@ -1,6 +1,6 @@
 location = "westeurope"
 rg_name  = "rg-akse-dev"
 kv_name  = "kv-akse-dev"
-acr_name = "aksecrdev"
+acr_name = "aksecrdev1"
 aks_name = "aks-akse-dev"
 postgres_database = "db-akse-dev"

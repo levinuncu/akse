@@ -7,7 +7,7 @@ spec:
   selector:
     app: {{ .Values.name }}
   ports:
-    - port: {{ Values.containerPort }}
-      targetPort: {{ Values.targetPort }}
+    - port: {{ .Values.containerPort }}
+      targetPort: {{ .Values.targetPort }}
       protocol: TCP
   type: ClusterIP
