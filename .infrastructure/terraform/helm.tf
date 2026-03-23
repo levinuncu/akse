@@ -81,6 +81,8 @@ resource "helm_release" "rabbitmq" {
   depends_on = [helm_release.rabbitmq_secret]
 }
 
+// TODO: Deploy postgres not with kubernetes but directly as azure service
+// TODO: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server
 resource "helm_release" "postgres" {
   name    = "postgres"
   chart   = "oci://registry-1.docker.io/cloudpirates/postgres"
@@ -95,7 +97,9 @@ resource "helm_release" "postgres" {
         username         = var.postgres_user
         database         = var.postgres_database
         existingSecret   = helm_release.postgres_secret.name
-        adminPasswordKey = "password"
+        secretKeys = {
+          adminPasswordKey = "password"
+        }
       }
     })
   ]
