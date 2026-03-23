@@ -1,0 +1,6 @@
+location = "westeurope"
+rg_name  = "rg-akse-prod"
+kv_name  = "kv-akse-prod"
+acr_name = "aksecrprod"
+aks_name = "aks-akse-prod"
+postgres_database = "db-akse-prod"
