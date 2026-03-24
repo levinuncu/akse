@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  pull_request:
+    branches: ["*"]
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: levinuncu/simis/tooling/github/checkout@develop
+
+      - name: Setup Node.js and pnpm
+        uses: levinuncu/simis/tooling/github/setup-node@develop
+        with:
+          node-version: "25.8.1"
+
+      - name: Run audit commands
+        run: pnpm -r run audit
+
+  format-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: levinuncu/simis/tooling/github/checkout@main
+
+      - name: Setup Node.js and pnpm
+        uses: levinuncu/simis/tooling/github/setup-node@develop
+        with:
+          node-version: "25.8.1"
+
+      - name: Run format-check commands
+        run: pnpm -r run format:check
+
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: levinuncu/simis/tooling/github/checkout@main
+
+      - name: Setup Node.js and pnpm
+        uses: levinuncu/simis/tooling/github/setup-node@develop
+        with:
+          node-version: "25.8.1"
+
+      - name: Run typecheck commands
+        run: pnpm -r run typecheck
+
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: levinuncu/simis/tooling/github/checkout@main
+
+      - name: Setup Node.js and pnpm
+        uses: levinuncu/simis/tooling/github/setup-node@develop
+        with:
+          node-version: "25.8.1"
+
+      - name: Run lint commands
+        run: pnpm -r run lint:check
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: levinuncu/simis/tooling/github/checkout@main
+
+      - name: Setup Node.js and pnpm
+        uses: levinuncu/simis/tooling/github/setup-node@develop
+        with:
+          node-version: "25.8.1"
+
+      - name: Run test commands
+        run: pnpm -r run test && pnpm -r run test:e2e
