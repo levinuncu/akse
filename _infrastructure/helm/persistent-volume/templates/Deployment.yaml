@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.name }}
+spec:
+  storageClassName: ""
+  capacity:
+    storage: {{ .Values.disk.size }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  csi:
+    driver: disk.csi.azure.com
+    volumeHandle: {{ .Values.disk.volumeHandle }}
+    fsType: {{ .Values.disk.fsType }}

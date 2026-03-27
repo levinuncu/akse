@@ -1,0 +1,84 @@
+{
+  "realm": "akse",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "rememberMe": false,
+  "verifyEmail": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": false,
+  "permanentLockout": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "admin"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "admin",
+      "firstName": "Example",
+      "lastName": "Admin",
+      "email": "example@admin.de",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin"
+        }
+      ],
+      "realmRoles": ["admin"]
+    },
+    {
+      "username": "user",
+      "firstName": "Example",
+      "lastName": "User",
+      "email": "example@user.de",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "user"
+        }
+      ]
+    }
+  ],
+  "requiredCredentials": ["password"],
+  "scopeMappings": [
+    {
+      "clientScope": "roles",
+      "roles": ["admin"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "client-id",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "secret",
+      "redirectUris": [
+        "http://localhost:3000/service/identity/v1/api/auth/callback"
+      ],
+      "webOrigins": ["*"],
+      "bearerOnly": false,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "consentRequired": false,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true,
+      "defaultClientScopes": ["roles", "profile", "email"]
+    }
+  ],
+  "accessTokenLifespan": 3600,
+  "offlineSessionIdleTimeout": 86400,
+  "offlineSessionMaxLifespan": 86400,
+  "refreshTokenMaxReuse": 10
+}
