@@ -1,0 +1,24 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  refreshInterval: 1m
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: {{ .Values.secretStoreName }}
+  target:
+    name: {{ .Values.secretName }}
+    creationPolicy: Owner
+{{- if .Values.targetData }}
+    template:
+      type: {{ .Values.targetType }}
+      engineVersion: v2
+      data:
+{{ toYaml .Values.targetData | nindent 8 }}
+{{- end }}
+{{- if .Values.data }}
+  data:
+{{ toYaml .Values.data | nindent 4 }}
+{{- end }}
