@@ -6,7 +6,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: "/"
     {{- with .Values.ingress_annotations }}
-    {{- toYaml . | nindent 2 }}
+    {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
   ingressClassName: "nginx"

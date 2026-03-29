@@ -17,9 +17,6 @@ export class TodoService {
   ) {}
 
   async createOne(createTodoDto: CreateTodoDto, user: KeycloakUser): Promise<void> {
-    this.logger.error('User object:', JSON.stringify(user));
-    this.logger.error('User.sub:', user.sub);
-
     const todo = this.todoRepository.create({
       ...createTodoDto,
       userId: user.sub,
@@ -39,7 +36,7 @@ export class TodoService {
 
   async deleteOneOrFail(id: string, user: KeycloakUser): Promise<void> {
     const todo = await this.findOneOrFail(id);
-    if (todo.userId !== user.sub && !user.realm_access.roles.includes(KeycloakRole.ADMIN)) {
+    if (todo.userId !== user.sub && !(user.realm_access?.roles ?? []).includes(KeycloakRole.ADMIN)) {
       throw new ForbiddenException('You are not allowed to delete the todo');
     }
 
