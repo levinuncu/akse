@@ -24,7 +24,7 @@ export class SharedConfig {
     username: process.env.POSTGRES_USER ?? '',
   };
 
-  readonly rabbitMq = {
+  readonly rabbitmq = {
     host: process.env.RABBITMQ_HOST ?? '',
     password: process.env.RABBITMQ_PASSWORD ?? '',
     port: Number(process.env.RABBITMQ_PORT) || 5672,
@@ -59,7 +59,7 @@ export const SharedConfigSchema = Joi.object({
     port: Joi.number().port().required(),
     username: Joi.string().required(),
   }).required(),
-  rabbitMq: Joi.object({
+  rabbitmq: Joi.object({
     host: Joi.string().hostname().required(),
     password: Joi.string().required(),
     port: Joi.number().port().required(),

@@ -62,7 +62,7 @@ import { TodoModule } from './todo/todo.module';
       useFactory: (configService: ConfigService) => ({
         exchanges: [],
         prefetchCount: 1,
-        uri: `amqp://${encodeURIComponent(configService.rabbitMq.username)}:${encodeURIComponent(configService.rabbitMq.password)}@${configService.rabbitMq.host}:${configService.rabbitMq.port}`,
+        uri: `amqp://${encodeURIComponent(configService.rabbitmq.username)}:${encodeURIComponent(configService.rabbitmq.password)}@${configService.rabbitmq.host}:${configService.rabbitmq.port}`,
       }),
     }),
     KeycloakConnectModule.registerAsync({

@@ -17,6 +17,9 @@ export class TodoService {
   ) {}
 
   async createOne(createTodoDto: CreateTodoDto, user: KeycloakUser): Promise<void> {
+    this.logger.error('User object:', JSON.stringify(user));
+    this.logger.error('User.sub:', user.sub);
+
     const todo = this.todoRepository.create({
       ...createTodoDto,
       userId: user.sub,

@@ -1,56 +1,52 @@
-output "rg_name" {
+output "resource_group_name" {
   value = azurerm_resource_group.rg.name
 }
 
-output "rg_id" {
-  value = azurerm_resource_group.rg.id
-}
-
 output "location" {
-  value = local.location
+  value = azurerm_resource_group.rg.location
 }
 
-output "acr_id" {
-  value = azurerm_container_registry.acr.id
+output "container_registry_id" {
+  value = module.acr.id
 }
 
-output "acr_login_server" {
-  value = azurerm_container_registry.acr.login_server
+output "container_registry_login_server" {
+  value = module.acr.login_server
 }
 
-output "kv_id" {
-  value = azurerm_key_vault.kv.id
+output "key_vault_id" {
+  value = module.key_vault.id
 }
 
-output "kv_vault_uri" {
-  value = azurerm_key_vault.kv.vault_uri
+output "key_vault_vault_uri" {
+  value = module.key_vault.vault_uri
 }
 
-output "pip_name" {
+output "public_ip_id" {
+  value = azurerm_public_ip.pip.id
+}
+
+output "public_ip_name" {
   value = azurerm_public_ip.pip.name
 }
 
-output "domain" {
-  value = azurerm_dns_zone.zone.name
+output "postgres_disk_id" {
+  value = azurerm_managed_disk.postgres_disk.id
 }
 
-output "law_id" {
-  value = azurerm_log_analytics_workspace.law.id
+output "postgres_disk_size" {
+  value = azurerm_managed_disk.postgres_disk.disk_size_gb
 }
 
-output "ai_connection_string" {
-  value     = azurerm_application_insights.ai.connection_string
+output "log_analytics_workspace_id" {
+  value = module.analytics.log_analytics_workspace_id
+}
+
+output "application_insights_connection_string" {
+  value     = module.analytics.application_insights_connection_string
   sensitive = true
 }
 
-output "pg_disk_name" {
-  value = azurerm_managed_disk.pg_disk.name
-}
-
-output "pg_disk_id" {
-  value = azurerm_managed_disk.pg_disk.id
-}
-
-output "pg_disk_size" {
-  value = azurerm_managed_disk.pg_disk.disk_size_gb
+output "secret_keys" {
+  value = local.secret_keys
 }

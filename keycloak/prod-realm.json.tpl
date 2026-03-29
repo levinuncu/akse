@@ -1,7 +1,7 @@
 {
   "realm": "${REALM}",
   "enabled": true,
-  "sslRequired": "none",
+  "sslRequired": "external",
   "registrationAllowed": true,
   "registrationEmailAsUsername": false,
   "loginWithEmailAllowed": true,
@@ -45,11 +45,41 @@
       "publicClient": false,
       "protocol": "openid-connect",
       "fullScopeAllowed": true,
-      "defaultClientScopes": ["roles", "profile", "email"]
+      "defaultClientScopes": ["roles", "profile", "email"],
+      "protocolMappers": [
+        {
+          "name": "subject",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "id",
+            "claim.name": "sub",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
     }
   ],
-  "accessTokenLifespan": 300,
-  "offlineSessionIdleTimeout": 900,
-  "offlineSessionMaxLifespan": 3600,
+  "accessTokenLifespan": 1800,
+  "offlineSessionIdleTimeout": 7200,
+  "offlineSessionMaxLifespan": 14400,
   "refreshTokenMaxReuse": 0
 }
