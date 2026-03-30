@@ -81,6 +81,8 @@ resource "helm_release" "rabbitmq" {
   depends_on = [helm_release.rabbitmq_secret]
 }
 
+// TODO: Deploy postgres not with kubernetes but directly as azure service?
+// TODO: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server
 resource "helm_release" "postgres" {
   name    = "postgres"
   chart   = "oci://registry-1.docker.io/cloudpirates/postgres"
@@ -95,7 +97,9 @@ resource "helm_release" "postgres" {
         username         = var.postgres_user
         database         = var.postgres_database
         existingSecret   = helm_release.postgres_secret.name
-        adminPasswordKey = "password"
+        secretKeys = {
+          adminPasswordKey = "password"
+        }
       }
     })
   ]
@@ -115,69 +119,69 @@ resource "helm_release" "ingress_nginx" {
   }
 }
 
-# # resource "helm_release" "backend" {
-# #   name  = "backend"
-# #   chart = "../helm/backend-service"
-# #   values = [
-# #     yamlencode({
-# #       name = "backend"
-# #       image = {
-# #         repository = "${module.acr.login_server}/backend"
-# #         tag        = "latest"
-# #       }
-# #       containerPort = 80
-# #       targetPort    = 80
-# #       path          = "/backend"
-# #       envs = [
-# #         {
-# #           name  = "POSTGRES_HOST"
-# #           value = "${helm_release.postgres.name}.${helm_release.postgres.namespace}.svc.cluster.local"
-# #         },
-# #         {
-# #           name  = "POSTGRES_PORT"
-# #           value = var.postgres_port
-# #         },
-# #         {
-# #           name  = "POSTGRES_USER"
-# #           value = var.postgres_user
-# #         },
-# #         {
-# #           name  = "POSTGRES_DATABASE"
-# #           value = var.postgres_database
-# #         },
-# #         {
-# #           name = "POSTGRES_PASSWORD"
-# #           valueFrom = {
-# #             secretKeyRef = {
-# #               name = helm_release.postgres_secret.name
-# #               key  = "password"
-# #             }
-# #           }
-# #         },
+resource "helm_release" "backend" {
+  name  = "backend"
+  chart = "../helm/backend-service"
+  values = [
+    yamlencode({
+      name = "backend"
+      image = {
+        repository = "${module.acr.login_server}/backend"
+        tag        = "latest"
+      }
+      containerPort = 80
+      targetPort    = 80
+      path          = "/backend"
+      envs = [
+        {
+          name  = "POSTGRES_HOST"
+          value = "${helm_release.postgres.name}.${helm_release.postgres.namespace}.svc.cluster.local"
+        },
+        {
+          name  = "POSTGRES_PORT"
+          value = var.postgres_port
+        },
+        {
+          name  = "POSTGRES_USER"
+          value = var.postgres_user
+        },
+        {
+          name  = "POSTGRES_DATABASE"
+          value = var.postgres_database
+        },
+        {
+          name = "POSTGRES_PASSWORD"
+          valueFrom = {
+            secretKeyRef = {
+              name = helm_release.postgres_secret.name
+              key  = "password"
+            }
+          }
+        },
 
-# #         {
-# #           name  = "RABBITMQ_HOST"
-# #           value = "${helm_release.rabbitmq.name}.${helm_release.rabbitmq.namespace}.svc.cluster.local"
-# #         },
-# #         {
-# #           name  = "RABBITMQ_PORT"
-# #           value = var.rabbitmq_port
-# #         },
-# #         {
-# #           name  = "RABBITMQ_USER"
-# #           value = var.rabbitmq_user
-# #         },
-# #         {
-# #           name = "RABBITMQ_PASSWORD"
-# #           valueFrom = {
-# #             secretKeyRef = {
-# #               name = helm_release.rabbitmq_secret.name
-# #               key  = "password"
-# #             }
-# #           }
-# #         },
-# #       ]
-# #     })
-# #   ]
-# #   depends_on = [helm_release.postgres, helm_release.rabbitmq]
-# # }
+        {
+          name  = "RABBITMQ_HOST"
+          value = "${helm_release.rabbitmq.name}.${helm_release.rabbitmq.namespace}.svc.cluster.local"
+        },
+        {
+          name  = "RABBITMQ_PORT"
+          value = var.rabbitmq_port
+        },
+        {
+          name  = "RABBITMQ_USER"
+          value = var.rabbitmq_user
+        },
+        {
+          name = "RABBITMQ_PASSWORD"
+          valueFrom = {
+            secretKeyRef = {
+              name = helm_release.rabbitmq_secret.name
+              key  = "password"
+            }
+          }
+        },
+      ]
+    })
+  ]
+  depends_on = [helm_release.postgres, helm_release.rabbitmq]
+}
