@@ -1,0 +1,25 @@
+{
+  "name": "dnd-campaign-manager-db",
+  "version": "1.0.0",
+  "description": "D&D Campaign Manager - Database initialization and seeding",
+  "type": "module",
+  "scripts": {
+    "db:init": "tsx scripts/db-init.ts",
+    "db:init:force": "tsx scripts/db-init.ts --force",
+    "db:setup": "bash scripts/setup-db.sh",
+    "db:setup:wait": "bash scripts/setup-db.sh --wait",
+    "db:setup:force": "bash scripts/setup-db.sh --force"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "tsx": "^4.7.0",
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.11.0"
+  },
+  "dependencies": {
+    "pg": "^8.11.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

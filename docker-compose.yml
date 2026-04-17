@@ -1,0 +1,189 @@
+services:
+  # ─── PostgreSQL ────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: dnd_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dnd_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-localdev_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-dnd_campaigns}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── RabbitMQ ──────────────────────────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: dnd_rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-dnd_rabbit}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-localdev_secret}
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Management UI → http://localhost:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ─── Keycloak ──────────────────────────────────────────────────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: dnd_keycloak
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER:-dnd_admin}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-localdev_secret}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./infrastructure/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/realms/master || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 60s
+
+  # ─── Redis (cache for 5e data + session) ────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: dnd_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── API Gateway ───────────────────────────────────────────────────────────
+  # Uncomment when ready to build services
+  # api-gateway:
+  #   build:
+  #     context: ./apps/api-gateway
+  #     dockerfile: Dockerfile
+  #   container_name: dnd_api_gateway
+  #   restart: unless-stopped
+  #   env_file: ./apps/api-gateway/.env
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     keycloak:
+  #       condition: service_healthy
+  #   profiles: ["services"]
+
+  # ─── Campaign Service ──────────────────────────────────────────────────────
+  # campaign-service:
+  #   build:
+  #     context: ./apps/campaign-service
+  #     dockerfile: Dockerfile
+  #   container_name: dnd_campaign_service
+  #   restart: unless-stopped
+  #   env_file: ./apps/campaign-service/.env
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     rabbitmq:
+  #       condition: service_healthy
+  #   profiles: ["services"]
+
+  # ─── Character Service ─────────────────────────────────────────────────────
+  # character-service:
+  #   build:
+  #     context: ./apps/character-service
+  #     dockerfile: Dockerfile
+  #   container_name: dnd_character_service
+  #   restart: unless-stopped
+  #   env_file: ./apps/character-service/.env
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     rabbitmq:
+  #       condition: service_healthy
+  #   profiles: ["services"]
+
+  # ─── Dice Service ──────────────────────────────────────────────────────────
+  # dice-service:
+  #   build:
+  #     context: ./apps/dice-service
+  #     dockerfile: Dockerfile
+  #   container_name: dnd_dice_service
+  #   restart: unless-stopped
+  #   env_file: ./apps/dice-service/.env
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     rabbitmq:
+  #       condition: service_healthy
+  #   profiles: ["services"]
+
+  # ─── Notification Service ──────────────────────────────────────────────────
+  # notification-service:
+  #   build:
+  #     context: ./apps/notification-service
+  #     dockerfile: Dockerfile
+  #   container_name: dnd_notification_service
+  #   restart: unless-stopped
+  #   env_file: ./apps/notification-service/.env
+  #   ports:
+  #     - "3005:3005"
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   profiles: ["services"]
+
+  # ─── 5e Data Service ──────────────────────────────────────────────────────
+  # dnd-data-service:
+  #   build:
+  #     context: ./apps/dnd-data-service
+  #     dockerfile: Dockerfile
+  #   container_name: dnd_data_service
+  #   restart: unless-stopped
+  #   env_file: ./apps/dnd-data-service/.env
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   profiles: ["services"]
+
+  # ─── Frontend ──────────────────────────────────────────────────────────────
+  # frontend:
+  #   build:
+  #     context: ./apps/frontend
+  #     dockerfile: Dockerfile
+  #   container_name: dnd_frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5173:80"
+  #   profiles: ["services"]
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  redis_data:
