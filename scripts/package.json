@@ -5,12 +5,7 @@
   "type": "module",
   "scripts": {
     "db:init": "tsx db-init.ts",
-    "db:init:force": "tsx db-init.ts --force",
-    "db:reimport": "tsx db_reimport_loader.ts",
-    "ensure:baseitems": "tsx ensure_baseitems.ts",
-    "db:setup": "bash setup-db.sh",
-    "db:setup:wait": "bash setup-db.sh --wait",
-    "db:setup:force": "bash setup-db.sh --force"
+    "db:init:force": "tsx db-init.ts --force"
   },
   "devDependencies": {
     "typescript": "^5.4.0",
@@ -19,8 +14,7 @@
     "@types/pg": "^8.11.0"
   },
   "dependencies": {
-    "pg": "^8.11.0",
-    "glob": "^10.3.3"
+    "pg": "^8.11.0"
   },
   "engines": {
     "node": ">=20.0.0"

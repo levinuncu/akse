@@ -721,6 +721,67 @@ async function loadConditions(client: pg.Client): Promise<number> {
   return loaded;
 }
 
+const XPHB_FEATS = [
+  { name: 'Actor', source: 'XPHB' },
+  { name: 'Athlete', source: 'XPHB' },
+  { name: 'Charger', source: 'XPHB' },
+  { name: 'Chef', source: 'XPHB' },
+  { name: 'Crossbow Expert', source: 'XPHB' },
+  { name: 'Crusher', source: 'XPHB' },
+  { name: 'Defensive Duelist', source: 'XPHB' },
+  { name: 'Dual Wielder', source: 'XPHB' },
+  { name: 'Durable', source: 'XPHB' },
+  { name: 'Elemental Adept', source: 'XPHB' },
+  { name: 'Grappler', source: 'XPHB' },
+  { name: 'Great Weapon Master', source: 'XPHB' },
+  { name: 'Heavily Armored', source: 'XPHB' },
+  { name: 'Heavy Armor Master', source: 'XPHB' },
+  { name: 'Inspiring Leader', source: 'XPHB' },
+  { name: 'Keen Mind', source: 'XPHB' },
+  { name: 'Lightly Armored', source: 'XPHB' },
+  { name: 'Mage Slayer', source: 'XPHB' },
+  { name: 'Medium Armor Master', source: 'XPHB' },
+  { name: 'Moderately Armored', source: 'XPHB' },
+  { name: 'Mounted Combatant', source: 'XPHB' },
+  { name: 'Observant', source: 'XPHB' },
+  { name: 'Piercer', source: 'XPHB' },
+  { name: 'Poisoner', source: 'XPHB' },
+  { name: 'Polearm Master', source: 'XPHB' },
+  { name: 'Resilient', source: 'XPHB' },
+  { name: 'Ritual Caster', source: 'XPHB' },
+  { name: 'Sentinel', source: 'XPHB' },
+  { name: 'Sharpshooter', source: 'XPHB' },
+  { name: 'Shield Master', source: 'XPHB' },
+  { name: 'Skill Expert', source: 'XPHB' },
+  { name: 'Skulker', source: 'XPHB' },
+  { name: 'Slasher', source: 'XPHB' },
+  { name: 'Spell Sniper', source: 'XPHB' },
+  { name: 'Telekinetic', source: 'XPHB' },
+  { name: 'Telepathic', source: 'XPHB' },
+  { name: 'War Caster', source: 'XPHB' },
+  { name: 'Weapon Master', source: 'XPHB' },
+];
+
+async function seedXphbFeats(client: pg.Client): Promise<number> {
+  const existing = await client.query('SELECT name FROM dnd_feats WHERE source = $1', ['XPHB']);
+  const existingSet = new Set(existing.rows.map(r => r.name));
+
+  let inserted = 0;
+  for (const feat of XPHB_FEATS) {
+    if (existingSet.has(feat.name)) continue;
+    await client.query(
+      `INSERT INTO dnd_feats (name, source, edition, description)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (name) DO NOTHING`,
+      [feat.name, feat.source, '2024', JSON.stringify([{ type: 'entries', name: feat.name, entries: ['See 5e.tools for details.'] }])]
+    );
+    inserted++;
+  }
+
+  await log(`Seeded ${inserted} XPHB feats`, 'success');
+  return inserted;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Main Function
 // ─────────────────────────────────────────────────────────────────────────────
@@ -756,6 +817,7 @@ async function main(): Promise<void> {
         items: await loadItems(client),
         bestiary: await loadBestiary(client),
         conditions: await loadConditions(client),
+        xphbFeats: await seedXphbFeats(client),
       };
 
       const totalLoaded = Object.values(stats).reduce((a, b) => a + b, 0);
